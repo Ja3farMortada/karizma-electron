@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Print</title>
+        <link
+            rel="stylesheet"
+            href="../node_modules/bootstrap/dist/css/bootstrap.min.css"
+        />
+        <link rel="stylesheet" href="printStyle.css" />
+        <script src="../node_modules/angular/angular.min.js"></script>
+    </head>
+    <body ng-app="printApp" ng-controller="printController">
+        <div class="header primary">
+            <div class="row d-flex justify-content-between">
+                <div class="col-8">
+                    <img src="kencosmetics.png" height="60px" />
+                    <!-- <p>VAT #: 3876117-601</p> -->
+                </div>
+                <div class="col-4 text-end">
+                    <p>
+                        +961 81-07 00 55
+                        <br />
+                        https://kencosmetics.com
+                        <br />
+                        info&#64;kencosmetics.com
+                    </p>
+                </div>
+            </div>
+
+            <hr class="mt-0 pt-0 primary-hr" />
+
+            <div class="row d-flex justify-content-between">
+                <div class="col-6">
+                    <p>
+                        <strong>Statement for:</strong> {{ account.name }}
+                        <br />
+                        <strong>Financial #:</strong> {{
+                        account.financial_number }}
+                        <br />
+                        <strong>Phone:</strong> {{ account.phone }}
+                        <br />
+                        <strong>Address:</strong> {{ account.address }}
+                    </p>
+                </div>
+
+                <div class="col-6 text-end">
+                    <h3>Statement of Accounts</h3>
+                    <p class="mb-0">
+                        <strong>Start Date:</strong> {{ startDate }}
+                    </p>
+                    <p><strong>End Date:</strong> {{ endDate }}</p>
+                </div>
+
+                <br />
+            </div>
+
+            <table class="table table-sm text-center">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Transaction</th>
+                        <th>Description</th>
+                        <th>Debit</th>
+                        <th>Credit</th>
+                        <th>Balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="record in data">
+                        <td>
+                            {{ record.journal_date || "Before " + startDate }}
+                        </td>
+                        <td>{{ record.journal_number }}</td>
+                        <td>{{ record.journal_description }}</td>
+                        <td>{{ record.debit | currency }}</td>
+                        <td>{{ record.credit | currency }}</td>
+
+                        <td>{{ balances[$index] | currency }}</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4"></td>
+                        <th>Balance Due</th>
+                        <th>{{ balances[balances.length - 1] | currency }}</th>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <!-- <div class="row d-flex justify-content-end text-end">
+                <div class="col-6 text-end">
+                    <strong>Subtotal: </strong> {{ invoice.sub_total | currency
+                    }}
+                    <br />
+                    <strong>Discount: </strong> %{{ invoice.discount_percent ||
+                    0 }}
+                    <hr class="m-0" />
+                    <strong>Net amount: </strong>
+                    {{ invoice.sub_total - invoice.discount_value | currency }}
+                    <br />
+
+                    <strong ng-if="invoice.discount2_percent"
+                        >Extra discount:
+                    </strong>
+                    <span ng-if="invoice.discount2_percent"
+                        >%{{ invoice.discount2_percent }}</span
+                    >
+
+                    <br ng-if="invoice.discount2_percent" />
+
+                    <strong ng-if="invoice.discount2_percent"
+                        >Net amount:
+                    </strong>
+                    <span ng-if="invoice.discount2_percent"
+                        >{{ invoice.sub_total - invoice.discount_value -
+                        invoice.discount2_value | currency }}</span
+                    >
+
+                    <br ng-if="invoice.discount2_percent" />
+
+                    <span class="float-start"
+                        ><strong>VAT LBP: </strong>{{ invoice.vat_value_lbp |
+                        currency:'L.L ':0 }}</span
+                    >
+                    <strong>VAT $ (11%): </strong> {{ invoice.vat_value |
+                    currency }}
+                    <br />
+                    <strong
+                        >Grand total: {{ invoice.total_amount | currency
+                        }}</strong
+                    >
+                </div>
+            </div> -->
+        </div>
+
+        <footer class="divFooter fixed">
+            <img src="icon-250.png" style="opacity: 0.1" />
+        </footer>
+    </body>
+
+    <script>
+        const app = angular.module("printApp", []);
+        app.controller("printController", function ($scope) {
+            window.electron.print((event, data) => {
+                $scope.$digest(($scope.data = data[0]));
+                $scope.$digest(($scope.balances = data[1]));
+                $scope.$digest(($scope.balances_lbp = data[2]));
+                $scope.$digest(($scope.startDate = data[3]));
+                $scope.$digest(($scope.endDate = data[4]));
+                $scope.$digest(($scope.account = data[5]));
+
+                console.log($scope.balances);
+            });
+
+            $scope.splitArrayIntoChunks = function (array, chunkSize) {
+                $scope.chunks = [];
+                for (let i = 0; i < array.length; i += chunkSize) {
+                    $scope.chunks.push(array.slice(i, i + chunkSize));
+                }
+
+                return $scope.chunks;
+            };
+        });
+    </script>
+</html>

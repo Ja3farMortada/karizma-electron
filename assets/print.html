@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Print</title>
+        <link
+            rel="stylesheet"
+            href="../node_modules/bootstrap/dist/css/bootstrap.min.css"
+        />
+        <link rel="stylesheet" href="printStyle.css" />
+        <script src="../node_modules/angular/angular.min.js"></script>
+    </head>
+    <body ng-app="printApp" ng-controller="printController">
+        <div class="header primary">
+            <div class="row d-flex justify-content-between wrapper">
+                <div class="col-7">
+                    <img src="logo.png" height="80px" />
+                </div>
+                <div class="col-5 text-end">
+                    <p>
+                        <strong>العنوان:</strong> الجنوب - برعشيت - الطريق العام
+                        <br />
+                        قرب الساحة العامة - مبنى ذياب
+                        <br />
+                    </p>
+                    <p>+961 81-637 348<strong> :الهاتف</strong></p>
+                </div>
+            </div>
+
+            <hr class="mt-0 pt-0 primary-hr wrapper" />
+
+            <div class="row d-flex justify-content-between">
+                <div class="col-6">
+                    <p>
+                        <strong>Billed To:</strong> {{ invoice.customer_name }}
+                        <br />
+                        <strong>Phone:</strong> {{ invoice.customer_phone }}
+                        <br />
+                        <strong>Address:</strong> {{ invoice.customer_address }}
+                    </p>
+                </div>
+
+                <div class="col-2">
+                    <!-- <h2 class="text-center">Price Quote</h2> -->
+                </div>
+
+                <div class="col-4 text-end">
+                    <h3 ng-if="invoice.type == 'sale'">Sales Invoice</h3>
+                    <h3 ng-if="invoice.type == 'return'">Return Invoice</h3>
+                    <p>
+                        <strong>Invoice #:</strong> {{ invoice.invoice_number }}
+                        <br />
+                        <strong>Date:</strong> {{ invoice.order_datetime }}
+                    </p>
+                </div>
+
+                <br />
+            </div>
+
+            <table class="table table-bordered table-sm text-center">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Item Description</th>
+                        <th>Unit Price</th>
+                        <th>Qty</th>
+                        <th>Total Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="record in invoice.items">
+                        <td>{{ $index + 1 }}</td>
+                        <td>{{ record.product_name }}</td>
+                        <td>{{ record.unit_price | currency }}</td>
+
+                        <td>{{ record.quantity }}</td>
+
+                        <td>{{ record.total_price | currency }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="row d-flex justify-content-end text-end">
+                <div class="col-6 text-end">
+                    <strong
+                        >Grand total: {{ invoice.total_amount | currency
+                        }}</strong
+                    >
+                </div>
+            </div>
+        </div>
+
+        <footer class="divFooter fixed">
+            <!-- <img src="icon-250.png" style="opacity: 0.1" /> -->
+        </footer>
+    </body>
+
+    <script>
+        const app = angular.module("printApp", []);
+        app.controller("printController", function ($scope) {
+            window.electron.print((event, data) => {
+                console.log(data);
+                $scope.$digest(($scope.invoice = data));
+                // $scope.$digest(($scope.invoice = data.invoice));
+            });
+
+            $scope.splitArrayIntoChunks = function (array, chunkSize) {
+                $scope.chunks = [];
+                for (let i = 0; i < array.length; i += chunkSize) {
+                    $scope.chunks.push(array.slice(i, i + chunkSize));
+                }
+
+                return $scope.chunks;
+            };
+        });
+    </script>
+</html>
