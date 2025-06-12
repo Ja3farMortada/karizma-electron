@@ -21,9 +21,17 @@ contextMenu({
 });
 
 // check if electron is in dev modea
+var node;
 const isEnvSet = "ELECTRON_IS_DEV" in process.env;
 const getFromEnv = Number.parseInt(process.env.ELECTRON_IS_DEV, 10) === 1;
 const isDev = isEnvSet ? getFromEnv : !app.isPackaged;
+if (!isDev) {
+    // require server
+    const server = require("../server");
+    node = server.listen(3500, () =>
+        console.log(`listening on port ${3500} ...`)
+    );
+}
 
 async function createWindow() {
     const win = new BrowserWindow({
@@ -66,6 +74,9 @@ app.whenReady().then(() => {
 
 app.on("window-all-closed", () => {
     if (process.platform !== "darwin") {
+        if (!isDev) {
+            node.close();
+        }
         app.quit();
     }
 });
