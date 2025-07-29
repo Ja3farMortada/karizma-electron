@@ -7,7 +7,7 @@ module.exports = (win, ipcMain) => {
     // auto update module
 
     autoUpdater.autoDownload = false;
-    autoUpdater.disableDifferentialDownload = true;
+    autoUpdater.disableDifferentialDownload = false;
     autoUpdater.disable;
     autoUpdater.logger = log;
     autoUpdater.logger.transports.file.level = "info";

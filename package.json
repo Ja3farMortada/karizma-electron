@@ -1,6 +1,6 @@
 {
     "name": "karizma",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Karizma Electron",
     "main": "main.js",
     "scripts": {
@@ -24,9 +24,6 @@
                 "releaseType": "release"
             }
         ],
-        "extraResources": [
-            "./server"
-        ],
         "npmRebuild": "false"
     },
     "repository": {
@@ -46,7 +43,7 @@
         "mysqldump": "^3.2.0"
     },
     "devDependencies": {
-        "electron": "^30.3.1",
-        "electron-builder": "^24.6.3"
+        "electron": "^37.2.4",
+        "electron-builder": "^26.0.12"
     }
 }
