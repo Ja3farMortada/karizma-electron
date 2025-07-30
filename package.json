@@ -1,6 +1,6 @@
 {
     "name": "karizma",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "Karizma Electron",
     "main": "main.js",
     "scripts": {
@@ -37,13 +37,10 @@
         "bootstrap": "^5.3.3",
         "electron-context-menu": "^3.6.1",
         "electron-log": "^4.4.8",
-        "electron-updater": "^6.1.1",
-        "moment": "^2.29.4",
-        "mysql2": "^3.6.0",
-        "mysqldump": "^3.2.0"
+        "electron-updater": "^6.1.1"
     },
     "devDependencies": {
-        "electron": "^30.3.1",
-        "electron-builder": "^24.6.3"
+        "electron": "^32.3.3",
+        "electron-builder": "^26.0.12"
     }
 }

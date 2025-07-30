@@ -1,8 +1,5 @@
 const { app, BrowserWindow, ipcMain, Menu } = require("electron");
 
-// mysql dump
-const mysqldump = require("mysqldump");
-
 // Menu
 const template = require("./menu");
 const menu = Menu.buildFromTemplate(template);
@@ -45,15 +42,12 @@ async function createWindow() {
     win.maximize();
     win.show();
 
-    const loadSystem = async function () {
-        if (isDev) {
-            win.loadURL("http://localhost:4200");
-        } else {
-            win.loadFile("app/browser/index.html");
-        }
-    };
+    const loadSystem = async () =>
+        isDev
+            ? win.loadURL("http://localhost:4200")
+            : win.loadFile("app/browser/index.html");
 
-    loadSystem();
+    await loadSystem();
 
     win.webContents.on("did-fail-load", () => loadSystem());
 
@@ -81,79 +75,117 @@ app.on("window-all-closed", () => {
     }
 });
 
-let printWindow;
-ipcMain.handle("print-invoice", async (event, data) => {
-    printWindow = new BrowserWindow({
-        width: 706.95553,
-        height: 1000,
-        show: false,
-        webPreferences: {
-            preload: path.join(__dirname, "preload.js"),
-        },
-    });
+// -------------------------
+// Generic print handler
+// -------------------------
 
-    printWindow.loadFile("assets/print.html");
+// Common print window options
+const PRINT_WINDOW_CONFIG = {
+    width: 706.95553,
+    height: 1000,
+    show: false,
+    webPreferences: {
+        preload: path.join(__dirname, "preload.js"),
+    },
+};
+const PRINT_OPTIONS = { silent: false, marginsType: 0 };
+
+// handle print function
+async function handlePrint(templatePath, data) {
+    const printWindow = new BrowserWindow(PRINT_WINDOW_CONFIG);
+    await printWindow.loadFile(templatePath);
     printWindow.show();
 
-    const printOptions = {
-        silent: false, // Print without showing a dialog (optional)
-        marginsType: 0, // Set margin type (optional)
-    };
-    printWindow.webContents.on("did-finish-load", async function () {
+    printWindow.webContents.on("did-finish-load", async () => {
         await printWindow.webContents.send("printDocument", data);
-        printWindow.webContents.print(printOptions, (success) => {
-            printWindow.close();
-        });
+        printWindow.webContents.print(PRINT_OPTIONS, () => printWindow.close());
     });
-});
+}
 
-ipcMain.handle("print-statement", async (event, data) => {
-    printWindow = new BrowserWindow({
-        width: 706.95553,
-        height: 1000,
-        show: false,
-        webPreferences: {
-            preload: path.join(__dirname, "preload.js"),
-        },
-    });
+// Register IPC handlers
+ipcMain.handle("print-invoice", (e, data) =>
+    handlePrint("assets/print.html", data)
+);
+ipcMain.handle("print-statement", (e, data) =>
+    handlePrint("assets/printStatement.html", data)
+);
+ipcMain.handle("print-stock", (e, data) =>
+    handlePrint("assets/stock.html", data)
+);
 
-    printWindow.loadFile("assets/printStatement.html");
-    printWindow.show();
+// let printWindow;
+// ipcMain.handle("print-invoice", async (event, data) => {
+//     printWindow = new BrowserWindow({
+//         width: 706.95553,
+//         height: 1000,
+//         show: false,
+//         webPreferences: {
+//             preload: path.join(__dirname, "preload.js"),
+//         },
+//     });
 
-    const printOptions = {
-        silent: false, // Print without showing a dialog (optional)
-        marginsType: 0, // Set margin type (optional)
-    };
-    printWindow.webContents.on("did-finish-load", async function () {
-        await printWindow.webContents.send("printDocument", data);
-        printWindow.webContents.print(printOptions, (success) => {
-            printWindow.close();
-        });
-    });
-});
+//     printWindow.loadFile("assets/print.html");
+//     printWindow.show();
 
-ipcMain.handle("print-stock", async (event, data) => {
-    // console.log(data);
-    printWindow = new BrowserWindow({
-        width: 706.95553,
-        height: 1000,
-        show: false,
-        webPreferences: {
-            preload: path.join(__dirname, "preload.js"),
-        },
-    });
+//     const printOptions = {
+//         silent: false, // Print without showing a dialog (optional)
+//         marginsType: 0, // Set margin type (optional)
+//     };
+//     printWindow.webContents.on("did-finish-load", async function () {
+//         await printWindow.webContents.send("printDocument", data);
+//         printWindow.webContents.print(printOptions, (success) => {
+//             printWindow.close();
+//         });
+//     });
+// });
 
-    printWindow.loadFile("assets/stock.html");
-    printWindow.show();
+// ipcMain.handle("print-statement", async (event, data) => {
+//     printWindow = new BrowserWindow({
+//         width: 706.95553,
+//         height: 1000,
+//         show: false,
+//         webPreferences: {
+//             preload: path.join(__dirname, "preload.js"),
+//         },
+//     });
 
-    const printOptions = {
-        silent: false, // Print without showing a dialog (optional)
-        marginsType: 0, // Set margin type (optional)
-    };
-    printWindow.webContents.on("did-finish-load", async function () {
-        await printWindow.webContents.send("printDocument", data);
-        printWindow.webContents.print(printOptions, (success) => {
-            // printWindow.close();
-        });
-    });
-});
+//     printWindow.loadFile("assets/printStatement.html");
+//     printWindow.show();
+
+//     const printOptions = {
+//         silent: false, // Print without showing a dialog (optional)
+//         marginsType: 0, // Set margin type (optional)
+//     };
+//     printWindow.webContents.on("did-finish-load", async function () {
+//         await printWindow.webContents.send("printDocument", data);
+//         printWindow.webContents.print(printOptions, (success) => {
+//             printWindow.close();
+//         });
+//     });
+// });
+
+// ipcMain.handle("print-stock", async (event, data) => {
+//     // console.log(data);
+//     printWindow = new BrowserWindow({
+//         width: 706.95553,
+//         height: 1000,
+//         show: false,
+//         webPreferences: {
+//             preload: path.join(__dirname, "preload.js"),
+//         },
+//     });
+
+//     printWindow.loadFile("assets/stock.html");
+//     printWindow.show();
+
+//     const printOptions = {
+//         silent: false, // Print without showing a dialog (optional)
+//         marginsType: 0, // Set margin type (optional)
+//     };
+//     printWindow.webContents.on("did-finish-load", async function () {
+//         await printWindow.webContents.send("printDocument", data);
+//         printWindow.webContents.print(printOptions, (success) => {
+//             // printWindow.close();
+//         });
+//     });
+// });
