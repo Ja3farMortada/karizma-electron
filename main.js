@@ -22,9 +22,9 @@ contextMenu({
 
 // check if electron is in dev modea
 // var node;
-// const isEnvSet = "ELECTRON_IS_DEV" in process.env;
-// const getFromEnv = Number.parseInt(process.env.ELECTRON_IS_DEV, 10) === 1;
-// const isDev = isEnvSet ? getFromEnv : !app.isPackaged;
+const isEnvSet = "ELECTRON_IS_DEV" in process.env;
+const getFromEnv = Number.parseInt(process.env.ELECTRON_IS_DEV, 10) === 1;
+const isDev = isEnvSet ? getFromEnv : !app.isPackaged;
 // if (!isDev) {
 //     // require server
 //     const server = require("../server");
