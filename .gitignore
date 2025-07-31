@@ -5,3 +5,4 @@ app
 /app
 server
 /server
+.env

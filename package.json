@@ -1,6 +1,6 @@
 {
-    "name": "karizma",
-    "version": "1.0.10",
+    "name": "karizma-cell",
+    "version": "1.0.12",
     "description": "Karizma",
     "main": "main.js",
     "scripts": {
@@ -19,7 +19,7 @@
         "publish": [
             {
                 "provider": "github",
-                "owner": "binariez-team",
+                "owner": "Ja3farMortada",
                 "repo": "karizma-electron",
                 "releaseType": "release"
             }
@@ -28,7 +28,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/binariez-team/karizma-electron.git"
+        "url": "https://github.com/Ja3farMortada/karizma-electron.git"
     },
     "author": "Binariez LLC",
     "license": "ISC",
