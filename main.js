@@ -184,14 +184,17 @@
 
 import { app, BrowserWindow, ipcMain, Menu } from "electron";
 import path from "path";
+import { fileURLToPath } from "url";
 import contextMenu from "electron-context-menu";
 import template from "./menu.js";
 import updater from "./update.js";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const menu = Menu.buildFromTemplate(template);
 Menu.setApplicationMenu(menu);
 
-// electron context menu
 contextMenu({
     showSaveImageAs: false,
     showSearchWithGoogle: false,
@@ -200,7 +203,6 @@ contextMenu({
     showCopyImage: false,
 });
 
-// check if electron is in dev mode
 const isEnvSet = "ELECTRON_IS_DEV" in process.env;
 const getFromEnv = Number.parseInt(process.env.ELECTRON_IS_DEV, 10) === 1;
 const isDev = isEnvSet ? getFromEnv : !app.isPackaged;
@@ -211,10 +213,7 @@ async function createWindow() {
         height: 600,
         show: false,
         webPreferences: {
-            preload: path.join(
-                path.dirname(new URL(import.meta.url).pathname),
-                "preload.js"
-            ),
+            preload: path.join(__dirname, "preload.js"),
         },
     });
     win.maximize();
@@ -223,19 +222,18 @@ async function createWindow() {
     const loadSystem = async () =>
         isDev
             ? win.loadURL("http://localhost:4200")
-            : win.loadFile("app/browser/index.html");
+            : win.loadFile(
+                  path.join(app.getAppPath(), "app/browser/index.html")
+              );
 
     await loadSystem();
-
     win.webContents.on("did-fail-load", () => loadSystem());
 
-    // run updater
     updater(win, ipcMain);
 }
 
 app.whenReady().then(() => {
     createWindow();
-
     app.on("activate", () => {
         if (BrowserWindow.getAllWindows().length === 0) {
             createWindow();
@@ -249,25 +247,19 @@ app.on("window-all-closed", () => {
     }
 });
 
-// -------------------------
-// Generic print handler
-// -------------------------
 const PRINT_WINDOW_CONFIG = {
     width: 706.95553,
     height: 1000,
     show: false,
     webPreferences: {
-        preload: path.join(
-            path.dirname(new URL(import.meta.url).pathname),
-            "preload.js"
-        ),
+        preload: path.join(__dirname, "preload.js"),
     },
 };
 const PRINT_OPTIONS = { silent: false, marginsType: 0 };
 
 async function handlePrint(templatePath, data) {
     const printWindow = new BrowserWindow(PRINT_WINDOW_CONFIG);
-    await printWindow.loadFile(templatePath);
+    await printWindow.loadFile(path.join(app.getAppPath(), templatePath));
     printWindow.show();
 
     printWindow.webContents.on("did-finish-load", async () => {
@@ -276,7 +268,6 @@ async function handlePrint(templatePath, data) {
     });
 }
 
-// Register IPC handlers
 ipcMain.handle("print-invoice", (e, data) =>
     handlePrint("assets/print.html", data)
 );
