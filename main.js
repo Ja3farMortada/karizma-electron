@@ -34,12 +34,12 @@ async function createWindow() {
     win.maximize();
     win.show();
 
-    const loadSystem = async () =>
+    const loadSystem = () =>
         isDev
             ? win.loadURL("http://localhost:4200")
             : win.loadFile("app/browser/index.html");
 
-    await loadSystem();
+    loadSystem();
 
     win.webContents.on("did-fail-load", () => loadSystem());
 
