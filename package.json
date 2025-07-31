@@ -1,6 +1,6 @@
 {
     "name": "karizma",
-    "version": "1.0.12",
+    "version": "1.0.5",
     "description": "Karizma",
     "main": "main.js",
     "scripts": {
@@ -26,8 +26,8 @@
         ],
         "npmRebuild": "false",
         "directories": {
-			"buildResources": "resources"
-		}
+            "buildResources": "resources"
+        }
     },
     "repository": {
         "type": "git",
@@ -43,7 +43,7 @@
         "electron-updater": "^6.6.2"
     },
     "devDependencies": {
-        "electron": "^30.3.1",
-        "electron-builder": "^24.6.3"
+        "electron": "^32.3.3",
+        "electron-builder": "^26.0.12"
     }
 }
