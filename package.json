@@ -1,8 +1,9 @@
 {
     "name": "karizma",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "description": "Karizma",
     "main": "main.js",
+    "type": "module",
     "scripts": {
         "start": "electron .",
         "test": "rm -rf dist && electron-builder --x64 --win",
