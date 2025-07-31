@@ -1,6 +1,6 @@
 {
     "name": "karizma",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "description": "Karizma",
     "main": "main.js",
     "type": "module",
@@ -15,7 +15,8 @@
         "artifactName": "${name}-${version}.${ext}",
         "target": "NSIS",
         "win": {
-            "target": "nsis"
+            "target": "nsis",
+            "signingHashAlgorithms": []
         },
         "nsis": {
             "oneClick": true,
