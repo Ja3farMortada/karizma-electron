@@ -33,7 +33,7 @@ module.exports = (win, ipcMain) => {
 
     // apply downloaded update
     ipcMain.handle("applyUpdate", () => {
-        autoUpdater.quitAndInstall();
+        autoUpdater.quitAndInstall(true, true);
     });
 
     // checking for update
