@@ -1,6 +1,6 @@
 {
     "name": "karizma",
-    "version": "1.0.9",
+    "version": "1.0.10",
     "description": "Karizma",
     "main": "main.js",
     "scripts": {
@@ -9,7 +9,7 @@
         "build": "rm -rf dist && electron-builder --x64 --win --publish always"
     },
     "build": {
-        "appId": "com.binariez.Ja3farMortada.karizma",
+        "appId": "com.binariez.Ja3farMortada.karizma-cell",
         "productName": "Karizma",
         "artifactName": "${name}-${version}.${ext}",
         "target": "NSIS",
