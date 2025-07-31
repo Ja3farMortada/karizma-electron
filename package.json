@@ -15,8 +15,7 @@
         "artifactName": "${name}-${version}.${ext}",
         "target": "NSIS",
         "win": {
-            "target": "nsis",
-            "signingHashAlgorithms": []
+            "target": "nsis"
         },
         "nsis": {
             "oneClick": true,
@@ -49,6 +48,6 @@
     },
     "devDependencies": {
         "electron": "^32.3.3",
-        "electron-builder": "^26.0.12"
+        "electron-builder": "^24.13.3"
     }
 }
