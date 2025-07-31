@@ -1,109 +1,109 @@
-// const { app, BrowserWindow, ipcMain, Menu } = require("electron");
+const { app, BrowserWindow, ipcMain, Menu } = require("electron");
 
-// // Menu
-// const template = require("./menu");
-// const menu = Menu.buildFromTemplate(template);
-// Menu.setApplicationMenu(menu);
+// Menu
+const template = require("./menu");
+const menu = Menu.buildFromTemplate(template);
+Menu.setApplicationMenu(menu);
 
-// const path = require("path");
+const path = require("path");
 
-// // electron context menu
-// contextMenu = require("electron-context-menu");
-// contextMenu({
-//     showSaveImageAs: false,
-//     showSearchWithGoogle: false,
-//     showInspectElement: false,
-//     showSelectAll: false,
-//     showCopyImage: false,
-// });
+// electron context menu
+contextMenu = require("electron-context-menu");
+contextMenu({
+    showSaveImageAs: false,
+    showSearchWithGoogle: false,
+    showInspectElement: false,
+    showSelectAll: false,
+    showCopyImage: false,
+});
 
-// // check if electron is in dev modea
-// const isEnvSet = "ELECTRON_IS_DEV" in process.env;
-// const getFromEnv = Number.parseInt(process.env.ELECTRON_IS_DEV, 10) === 1;
-// const isDev = isEnvSet ? getFromEnv : !app.isPackaged;
+// check if electron is in dev modea
+const isEnvSet = "ELECTRON_IS_DEV" in process.env;
+const getFromEnv = Number.parseInt(process.env.ELECTRON_IS_DEV, 10) === 1;
+const isDev = isEnvSet ? getFromEnv : !app.isPackaged;
 
-// async function createWindow() {
-//     const win = new BrowserWindow({
-//         width: 800,
-//         height: 600,
-//         show: false,
-//         webPreferences: {
-//             preload: path.join(__dirname, "preload.js"),
-//         },
-//     });
-//     win.maximize();
-//     win.show();
+async function createWindow() {
+    const win = new BrowserWindow({
+        width: 800,
+        height: 600,
+        show: false,
+        webPreferences: {
+            preload: path.join(__dirname, "preload.js"),
+        },
+    });
+    win.maximize();
+    win.show();
 
-//     const loadSystem = async () =>
-//         isDev
-//             ? win.loadURL("http://localhost:4200")
-//             : win.loadFile("app/browser/index.html");
+    const loadSystem = async () =>
+        isDev
+            ? win.loadURL("http://localhost:4200")
+            : win.loadFile("app/browser/index.html");
 
-//     await loadSystem();
+    await loadSystem();
 
-//     win.webContents.on("did-fail-load", () => loadSystem());
+    win.webContents.on("did-fail-load", () => loadSystem());
 
-//     // require update module
-//     const updater = require("./update");
-//     updater(win, ipcMain);
-// }
+    // require update module
+    const updater = require("./update");
+    updater(win, ipcMain);
+}
 
-// app.whenReady().then(() => {
-//     createWindow();
+app.whenReady().then(() => {
+    createWindow();
 
-//     app.on("activate", () => {
-//         if (BrowserWindow.getAllWindows().length === 0) {
-//             createWindow();
-//         }
-//     });
-// });
+    app.on("activate", () => {
+        if (BrowserWindow.getAllWindows().length === 0) {
+            createWindow();
+        }
+    });
+});
 
-// app.on("window-all-closed", () => {
-//     if (process.platform !== "darwin") {
-//         // if (!isDev) {
-//         //     node.close();
-//         // }
-//         app.quit();
-//     }
-// });
+app.on("window-all-closed", () => {
+    if (process.platform !== "darwin") {
+        // if (!isDev) {
+        //     node.close();
+        // }
+        app.quit();
+    }
+});
 
-// // -------------------------
-// // Generic print handler
-// // -------------------------
+// -------------------------
+// Generic print handler
+// -------------------------
 
-// // Common print window options
-// const PRINT_WINDOW_CONFIG = {
-//     width: 706.95553,
-//     height: 1000,
-//     show: false,
-//     webPreferences: {
-//         preload: path.join(__dirname, "preload.js"),
-//     },
-// };
-// const PRINT_OPTIONS = { silent: false, marginsType: 0 };
+// Common print window options
+const PRINT_WINDOW_CONFIG = {
+    width: 706.95553,
+    height: 1000,
+    show: false,
+    webPreferences: {
+        preload: path.join(__dirname, "preload.js"),
+    },
+};
+const PRINT_OPTIONS = { silent: false, marginsType: 0 };
 
-// // handle print function
-// async function handlePrint(templatePath, data) {
-//     const printWindow = new BrowserWindow(PRINT_WINDOW_CONFIG);
-//     await printWindow.loadFile(templatePath);
-//     printWindow.show();
+// handle print function
+async function handlePrint(templatePath, data) {
+    const printWindow = new BrowserWindow(PRINT_WINDOW_CONFIG);
+    await printWindow.loadFile(templatePath);
+    printWindow.show();
 
-//     printWindow.webContents.on("did-finish-load", async () => {
-//         await printWindow.webContents.send("printDocument", data);
-//         printWindow.webContents.print(PRINT_OPTIONS, () => printWindow.close());
-//     });
-// }
+    printWindow.webContents.on("did-finish-load", async () => {
+        await printWindow.webContents.send("printDocument", data);
+        printWindow.webContents.print(PRINT_OPTIONS, () => printWindow.close());
+    });
+}
 
-// // Register IPC handlers
-// ipcMain.handle("print-invoice", (e, data) =>
-//     handlePrint("assets/print.html", data)
-// );
-// ipcMain.handle("print-statement", (e, data) =>
-//     handlePrint("assets/printStatement.html", data)
-// );
-// ipcMain.handle("print-stock", (e, data) =>
-//     handlePrint("assets/stock.html", data)
-// );
+// Register IPC handlers
+ipcMain.handle("print-invoice", (e, data) =>
+    handlePrint("assets/print.html", data)
+);
+ipcMain.handle("print-statement", (e, data) =>
+    handlePrint("assets/printStatement.html", data)
+);
+ipcMain.handle("print-stock", (e, data) =>
+    handlePrint("assets/stock.html", data)
+);
 
 // // let printWindow;
 // // ipcMain.handle("print-invoice", async (event, data) => {
@@ -181,99 +181,3 @@
 // //         });
 // //     });
 // // });
-
-import { app, BrowserWindow, ipcMain, Menu } from "electron";
-import path from "path";
-import { fileURLToPath } from "url";
-import contextMenu from "electron-context-menu";
-import template from "./menu.js";
-import updater from "./update.js";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const menu = Menu.buildFromTemplate(template);
-Menu.setApplicationMenu(menu);
-
-contextMenu({
-    showSaveImageAs: false,
-    showSearchWithGoogle: false,
-    showInspectElement: false,
-    showSelectAll: false,
-    showCopyImage: false,
-});
-
-const isEnvSet = "ELECTRON_IS_DEV" in process.env;
-const getFromEnv = Number.parseInt(process.env.ELECTRON_IS_DEV, 10) === 1;
-const isDev = isEnvSet ? getFromEnv : !app.isPackaged;
-
-async function createWindow() {
-    const win = new BrowserWindow({
-        width: 800,
-        height: 600,
-        show: false,
-        webPreferences: {
-            preload: path.join(__dirname, "preload.js"),
-        },
-    });
-    win.maximize();
-    win.show();
-
-    const loadSystem = async () =>
-        isDev
-            ? win.loadURL("http://localhost:4200")
-            : win.loadFile(
-                  path.join(app.getAppPath(), "app/browser/index.html")
-              );
-
-    await loadSystem();
-    win.webContents.on("did-fail-load", () => loadSystem());
-
-    updater(win, ipcMain);
-}
-
-app.whenReady().then(() => {
-    createWindow();
-    app.on("activate", () => {
-        if (BrowserWindow.getAllWindows().length === 0) {
-            createWindow();
-        }
-    });
-});
-
-app.on("window-all-closed", () => {
-    if (process.platform !== "darwin") {
-        app.quit();
-    }
-});
-
-const PRINT_WINDOW_CONFIG = {
-    width: 706.95553,
-    height: 1000,
-    show: false,
-    webPreferences: {
-        preload: path.join(__dirname, "preload.js"),
-    },
-};
-const PRINT_OPTIONS = { silent: false, marginsType: 0 };
-
-async function handlePrint(templatePath, data) {
-    const printWindow = new BrowserWindow(PRINT_WINDOW_CONFIG);
-    await printWindow.loadFile(path.join(app.getAppPath(), templatePath));
-    printWindow.show();
-
-    printWindow.webContents.on("did-finish-load", async () => {
-        await printWindow.webContents.send("printDocument", data);
-        printWindow.webContents.print(PRINT_OPTIONS, () => printWindow.close());
-    });
-}
-
-ipcMain.handle("print-invoice", (e, data) =>
-    handlePrint("assets/print.html", data)
-);
-ipcMain.handle("print-statement", (e, data) =>
-    handlePrint("assets/printStatement.html", data)
-);
-ipcMain.handle("print-stock", (e, data) =>
-    handlePrint("assets/stock.html", data)
-);
