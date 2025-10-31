@@ -13,7 +13,7 @@
     </head>
     <body ng-app="printApp" ng-controller="printController">
         <div class="container-fluid">
-            <table class="table table-sm table-bordered text-center">
+            <!-- <table class="table table-sm table-bordered text-center">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -21,36 +21,90 @@
                         <th>Description</th>
                         <th>Category</th>
                         <th>Qty</th>
-                        <!-- <th>Avg Cost</th> -->
                         <th>Price</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="record in data">
+                    <tr ng-repeat="record in products">
                         <td>{{ $index + 1 }}</td>
                         <td>{{ record.sku || '---' }}</td>
                         <td>{{ record.product_name }}</td>
                         <td>{{ record.category_name || '---' }}</td>
                         <td>{{ record.quantity || '---' }}</td>
-                        <!-- <td>{{ record.average_cost_usd | currency }}</td> -->
-                        <td ng-if="record.currency === 'dollar'">
-                            {{ record.unit_price_usd | currency }}
-                        </td>
-                        <td ng-if="record.currency === 'lira'">
-                            {{ record.unit_price_usd.toLocaleString() }} L.L
-                        </td>
+                        <td>{{ record.unit_price_usd | currency }}</td>
                     </tr>
                 </tbody>
-            </table>
+            </table> -->
+            <div ng-repeat="cat in categories">
+                <h4 class="mt-4 mb-2 text-dark text-uppercase">
+                    {{ cat.category_name }}
+                </h4>
+
+                <table class="table table-sm table-bordered text-center">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>SKU</th>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th>Qty</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="record in cat.items">
+                            <td>{{ $index + 1 }}</td>
+                            <td>{{ record.sku || '---' }}</td>
+                            <td>{{ record.product_name }}</td>
+                            <td>{{ record.category_name || '---' }}</td>
+                            <td>{{ record.quantity || '---' }}</td>
+                            <td>{{ record.unit_price_usd | currency }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </body>
 
     <script>
         const app = angular.module("printApp", []);
+        // app.controller("printController", function ($scope) {
+        //     window.electron.print((event, data) => {
+        //         console.log(data);
+        //         $scope.$digest(($scope.products = data));
+
+        //     });
+        // });
         app.controller("printController", function ($scope) {
             window.electron.print((event, data) => {
                 console.log(data);
-                $scope.$digest(($scope.data = data));
+
+                // Assign the received products
+                // $scope.products = data;
+                $scope.$digest(($scope.products = data));
+
+                // Group products by category_id_fk
+                const grouped = {};
+
+                data.forEach((p) => {
+                    if (!grouped[p.category_id_fk]) {
+                        grouped[p.category_id_fk] = {
+                            category_name: p.category_name || "Uncategorized",
+                            items: [],
+                        };
+                    }
+                    grouped[p.category_id_fk].items.push(p);
+                });
+
+                // Convert grouped object to array
+                $scope.categories = Object.values(grouped);
+
+                // Optional: sort categories alphabetically
+                $scope.categories.sort((a, b) =>
+                    a.category_name.localeCompare(b.category_name)
+                );
+
+                $scope.$apply(); // ensure Angular updates the view
             });
         });
     </script>

@@ -90,7 +90,9 @@ async function handlePrint(templatePath, data) {
 
     printWindow.webContents.on("did-finish-load", async () => {
         await printWindow.webContents.send("printDocument", data);
-        printWindow.webContents.print(PRINT_OPTIONS, () => printWindow.close());
+        printWindow.webContents.print(PRINT_OPTIONS, () => {
+            printWindow.close();
+        });
     });
 }
 
@@ -156,28 +158,28 @@ ipcMain.handle("print-stock", (e, data) =>
 // //     });
 // // });
 
-ipcMain.handle("print-stock", async (event, data) => {
-    // console.log(data);
-    printWindow = new BrowserWindow({
-        width: 706.95553,
-        height: 1000,
-        show: false,
-        webPreferences: {
-            preload: path.join(__dirname, "preload.js"),
-        },
-    });
+// ipcMain.handle("print-stock", async (event, data) => {
+//     // console.log(data);
+//     printWindow = new BrowserWindow({
+//         width: 706.95553,
+//         height: 1000,
+//         show: false,
+//         webPreferences: {
+//             preload: path.join(__dirname, "preload.js"),
+//         },
+//     });
 
-    printWindow.loadFile("assets/stock.html");
-    printWindow.show();
+//     printWindow.loadFile("assets/stock.html");
+//     printWindow.show();
 
-    const printOptions = {
-        silent: false, // Print without showing a dialog (optional)
-        marginsType: 0, // Set margin type (optional)
-    };
-    printWindow.webContents.on("did-finish-load", async function () {
-        await printWindow.webContents.send("printDocument", data);
-        printWindow.webContents.print(printOptions, (success) => {
-            printWindow.close();
-        });
-    });
-});
+//     const printOptions = {
+//         silent: false, // Print without showing a dialog (optional)
+//         marginsType: 0, // Set margin type (optional)
+//     };
+//     printWindow.webContents.on("did-finish-load", async function () {
+//         await printWindow.webContents.send("printDocument", data);
+//         printWindow.webContents.print(printOptions, (success) => {
+//             printWindow.close();
+//         });
+//     });
+// });
