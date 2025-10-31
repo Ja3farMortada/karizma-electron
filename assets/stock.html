@@ -16,24 +16,29 @@
             <table class="table table-sm table-bordered text-center">
                 <thead>
                     <tr>
+                        <th>#</th>
                         <th>SKU</th>
                         <th>Description</th>
                         <th>Category</th>
                         <th>Qty</th>
-                        <th>Avg Cost</th>
+                        <!-- <th>Avg Cost</th> -->
                         <th>Price</th>
-                        <th>TTC Price</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr ng-repeat="record in data">
-                        <td>{{ record.sku }}</td>
+                        <td>{{ $index + 1 }}</td>
+                        <td>{{ record.sku || '---' }}</td>
                         <td>{{ record.product_name }}</td>
-                        <td>{{ record.category_name }}</td>
-                        <td>{{ record.quantity }}</td>
-                        <td>{{ record.average_cost_usd | currency }}</td>
-                        <td>{{ record.unit_price_usd | currency }}</td>
-                        <td>{{ record.ttc_price | currency }}</td>
+                        <td>{{ record.category_name || '---' }}</td>
+                        <td>{{ record.quantity || '---' }}</td>
+                        <!-- <td>{{ record.average_cost_usd | currency }}</td> -->
+                        <td ng-if="record.currency === 'dollar'">
+                            {{ record.unit_price_usd | currency }}
+                        </td>
+                        <td ng-if="record.currency === 'lira'">
+                            {{ record.unit_price_usd.toLocaleString() }} L.L
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -47,15 +52,6 @@
                 console.log(data);
                 $scope.$digest(($scope.data = data));
             });
-
-            $scope.splitArrayIntoChunks = function (array, chunkSize) {
-                $scope.chunks = [];
-                for (let i = 0; i < array.length; i += chunkSize) {
-                    $scope.chunks.push(array.slice(i, i + chunkSize));
-                }
-
-                return $scope.chunks;
-            };
         });
     </script>
 </html>
