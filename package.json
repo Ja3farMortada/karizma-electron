@@ -1,6 +1,6 @@
 {
 	"name": "karizma",
-	"version": "1.1.12",
+	"version": "1.1.14",
 	"description": "Karizma",
 	"main": "main.js",
 	"scripts": {
