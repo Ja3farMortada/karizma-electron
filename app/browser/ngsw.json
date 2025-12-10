@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1765407055442,
+  "timestamp": 1765409901841,
   "index": "./index.html",
   "assetGroups": [
     {
@@ -94,7 +94,7 @@
         "./chunk-Z3UO65U3.js",
         "./favicon.ico",
         "./index.html",
-        "./main-STBDRYZP.js",
+        "./main-AASGD4YA.js",
         "./manifest.webmanifest",
         "./polyfills-FFHMD2TL.js",
         "./styles-ZMGUXBTZ.css"
@@ -240,9 +240,9 @@
     "./icons/apple-touch-icon.png": "d4a7f067fef7001a085f552f7f1ca071819050de",
     "./icons/favicon-16x16.png": "582c6463446f382828f031076228305aa7398c52",
     "./icons/favicon-32x32.png": "d2c17d68e0adcd3188f31469328785aa79f62930",
-    "./index.html": "88c40495ff824dfe591c0ecf54359b8dd7b44d70",
+    "./index.html": "2db890e5c5144d42b494f2dda7985c93f213dd35",
     "./karizma.png": "a182bcf9e25289c216fd9aeceb92e14e09ea2318",
-    "./main-STBDRYZP.js": "1ce255316515e6d8f0a1ab8a7fd619b4b664acde",
+    "./main-AASGD4YA.js": "1a453b37839dd081430283393b97a1a492ba073e",
     "./manifest.webmanifest": "4af65e62dfa90d5ee64d9689966ee02f88159a73",
     "./media/Almarai-Bold-6L34D6Q4.woff2": "72a8a29483d9672fd428ab6dfa063011bb8eeb81",
     "./media/Almarai-ExtraBold-JBEEJJCH.woff2": "3e8ee1914bc4a26162f6620adcde83413e53f06b",
