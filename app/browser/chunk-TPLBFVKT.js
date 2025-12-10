@@ -1,0 +1,1 @@
+var l=class{constructor(){this.cost_dollar=0,this.subtotal_dollar=0,this.total_dollar=0,this.discount_dollar=0,this.discount2_dollar=0,this.total_dollar_discount_2=0,this.vat_dollar=0,this.total_qty=0}},o=function(t){return t.unit_price_usd="unit_price_usd",t.whole_price_usd="whole_price_usd",t.grandwhole_price_usd="grandwhole_price_usd",t}(o||{});export{l as a,o as b};

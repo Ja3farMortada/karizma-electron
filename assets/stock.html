@@ -9,9 +9,9 @@
             href="../node_modules/bootstrap/dist/css/bootstrap.min.css"
         />
         <link rel="stylesheet" href="printStyle.css" />
-        <script src="../node_modules/angular/angular.min.js"></script>
+        <script src="../node_modules/vue/dist/vue.global.js"></script>
     </head>
-    <body ng-app="printApp" ng-controller="printController">
+    <body id="app">
         <div class="container-fluid">
             <!-- <table class="table table-sm table-bordered text-center">
                 <thead>
@@ -35,7 +35,7 @@
                     </tr>
                 </tbody>
             </table> -->
-            <div ng-repeat="cat in categories">
+            <div v-for="(cat, index) in categories" :key="index">
                 <h4 class="mt-4 mb-2 text-dark text-uppercase">
                     {{ cat.category_name }}
                 </h4>
@@ -52,60 +52,72 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="record in cat.items">
-                            <td>{{ $index + 1 }}</td>
+                        <tr v-for="(record, rIndex) in cat.items" :key="rIndex">
+                            <td>{{ rIndex + 1 }}</td>
                             <td>{{ record.sku || '---' }}</td>
                             <td>{{ record.product_name }}</td>
                             <td>{{ record.category_name || '---' }}</td>
                             <td>{{ record.quantity || '---' }}</td>
-                            <td>{{ record.unit_price_usd | currency }}</td>
+                            <td>{{ currency(record.unit_price_usd) }}</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
+
+        <script>
+            const { createApp, ref } = Vue;
+
+            createApp({
+                setup() {
+                    const products = ref([]);
+                    const categories = ref([]);
+
+                    const currency = (value, symbol = "$", decimals = 2) => {
+                        if (value === undefined || value === null) return "";
+                        return (
+                            symbol +
+                            Number(value)
+                                .toFixed(decimals)
+                                .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
+                        );
+                    };
+
+                    window.electron.print((event, data) => {
+                        console.log(data);
+                        products.value = data;
+
+                        // Group products by category_id_fk
+                        const grouped = {};
+
+                        data.forEach((p) => {
+                            if (!grouped[p.category_id_fk]) {
+                                grouped[p.category_id_fk] = {
+                                    category_name:
+                                        p.category_name || "Uncategorized",
+                                    items: [],
+                                };
+                            }
+                            grouped[p.category_id_fk].items.push(p);
+                        });
+
+                        // Convert grouped object to array
+                        const cats = Object.values(grouped);
+
+                        // Optional: sort categories alphabetically
+                        cats.sort((a, b) =>
+                            a.category_name.localeCompare(b.category_name)
+                        );
+
+                        categories.value = cats;
+                    });
+
+                    return {
+                        categories,
+                        currency,
+                    };
+                },
+            }).mount("#app");
+        </script>
     </body>
-
-    <script>
-        const app = angular.module("printApp", []);
-        // app.controller("printController", function ($scope) {
-        //     window.electron.print((event, data) => {
-        //         console.log(data);
-        //         $scope.$digest(($scope.products = data));
-
-        //     });
-        // });
-        app.controller("printController", function ($scope) {
-            window.electron.print((event, data) => {
-                console.log(data);
-
-                // Assign the received products
-                // $scope.products = data;
-                $scope.$digest(($scope.products = data));
-
-                // Group products by category_id_fk
-                const grouped = {};
-
-                data.forEach((p) => {
-                    if (!grouped[p.category_id_fk]) {
-                        grouped[p.category_id_fk] = {
-                            category_name: p.category_name || "Uncategorized",
-                            items: [],
-                        };
-                    }
-                    grouped[p.category_id_fk].items.push(p);
-                });
-
-                // Convert grouped object to array
-                $scope.categories = Object.values(grouped);
-
-                // Optional: sort categories alphabetically
-                $scope.categories.sort((a, b) =>
-                    a.category_name.localeCompare(b.category_name)
-                );
-
-                $scope.$apply(); // ensure Angular updates the view
-            });
-        });
-    </script>
 </html>

@@ -10,9 +10,9 @@
             href="../node_modules/bootstrap/dist/css/bootstrap.min.css"
         />
         <link rel="stylesheet" href="printStyle.css" />
-        <script src="../node_modules/angular/angular.min.js"></script>
+        <script src="../node_modules/vue/dist/vue.global.js"></script>
     </head>
-    <body ng-app="printApp" ng-controller="printController">
+    <body id="app">
         <div class="header primary">
             <div class="row d-flex justify-content-between">
                 <div class="col-8">
@@ -69,23 +69,23 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="record in data">
+                    <tr v-for="(record, index) in data" :key="index">
                         <td>
                             {{ record.journal_date || "Before " + startDate }}
                         </td>
                         <td>{{ record.journal_number }}</td>
                         <td>{{ record.journal_description }}</td>
-                        <td>{{ record.debit | currency }}</td>
-                        <td>{{ record.credit | currency }}</td>
+                        <td>{{ currency(record.debit) }}</td>
+                        <td>{{ currency(record.credit) }}</td>
 
-                        <td>{{ balances[$index] | currency }}</td>
+                        <td>{{ currency(balances[index]) }}</td>
                     </tr>
                 </tbody>
                 <tfoot>
                     <tr>
                         <td colspan="4"></td>
                         <th>Balance Due</th>
-                        <th>{{ balances[balances.length - 1] | currency }}</th>
+                        <th>{{ currency(balances[balances.length - 1]) }}</th>
                     </tr>
                 </tfoot>
             </table>
@@ -139,30 +139,51 @@
         <footer class="divFooter fixed">
             <img src="icon-250.png" style="opacity: 0.1" />
         </footer>
+
+        <script>
+            const { createApp, ref } = Vue;
+
+            createApp({
+                setup() {
+                    const data = ref([]);
+                    const balances = ref([]);
+                    const balances_lbp = ref([]);
+                    const startDate = ref("");
+                    const endDate = ref("");
+                    const account = ref({});
+
+                    const currency = (value, symbol = "$", decimals = 2) => {
+                        if (value === undefined || value === null) return "";
+                        return (
+                            symbol +
+                            Number(value)
+                                .toFixed(decimals)
+                                .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
+                        );
+                    };
+
+                    window.electron.print((event, incomingData) => {
+                        data.value = incomingData[0];
+                        balances.value = incomingData[1];
+                        balances_lbp.value = incomingData[2];
+                        startDate.value = incomingData[3];
+                        endDate.value = incomingData[4];
+                        account.value = incomingData[5];
+
+                        console.log(balances.value);
+                    });
+
+                    return {
+                        data,
+                        balances,
+                        balances_lbp,
+                        startDate,
+                        endDate,
+                        account,
+                        currency,
+                    };
+                },
+            }).mount("#app");
+        </script>
     </body>
-
-    <script>
-        const app = angular.module("printApp", []);
-        app.controller("printController", function ($scope) {
-            window.electron.print((event, data) => {
-                $scope.$digest(($scope.data = data[0]));
-                $scope.$digest(($scope.balances = data[1]));
-                $scope.$digest(($scope.balances_lbp = data[2]));
-                $scope.$digest(($scope.startDate = data[3]));
-                $scope.$digest(($scope.endDate = data[4]));
-                $scope.$digest(($scope.account = data[5]));
-
-                console.log($scope.balances);
-            });
-
-            $scope.splitArrayIntoChunks = function (array, chunkSize) {
-                $scope.chunks = [];
-                for (let i = 0; i < array.length; i += chunkSize) {
-                    $scope.chunks.push(array.slice(i, i + chunkSize));
-                }
-
-                return $scope.chunks;
-            };
-        });
-    </script>
 </html>

@@ -10,9 +10,9 @@
             href="../node_modules/bootstrap/dist/css/bootstrap.min.css"
         />
         <link rel="stylesheet" href="printStyle.css" />
-        <script src="../node_modules/angular/angular.min.js"></script>
+        <script src="../node_modules/vue/dist/vue.global.js"></script>
     </head>
-    <body ng-app="printApp" ng-controller="printController">
+    <body id="app">
         <div class="header primary">
             <div class="row d-flex justify-content-between wrapper">
                 <div class="col-7">
@@ -42,8 +42,8 @@
                 </div>
 
                 <div class="col-4 text-end">
-                    <h3 ng-if="invoice.type == 'sale'">Sales Invoice</h3>
-                    <h3 ng-if="invoice.type == 'return'">Return Invoice</h3>
+                    <h3 v-if="invoice.type == 'sale'">Sales Invoice</h3>
+                    <h3 v-if="invoice.type == 'return'">Return Invoice</h3>
                     <p>
                         <strong>Invoice #:</strong> {{ invoice.invoice_number }}
                         <br />
@@ -65,14 +65,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="record in invoice.items">
-                        <td>{{ $index + 1 }}</td>
+                    <tr v-for="(record, index) in invoice.items" :key="index">
+                        <td>{{ index + 1 }}</td>
                         <td>{{ record.product_name }}</td>
-                        <td>{{ record.unit_price | currency }}</td>
+                        <td>{{ currency(record.unit_price) }}</td>
 
                         <td>{{ record.quantity }}</td>
 
-                        <td>{{ record.total_price | currency }}</td>
+                        <td>{{ currency(record.total_price) }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -80,7 +80,7 @@
             <div class="row d-flex justify-content-end text-end">
                 <div class="col-6 text-end">
                     <strong
-                        >Grand total: {{ invoice.total_amount | currency
+                        >Grand total: {{ currency(invoice.total_amount)
                         }}</strong
                     >
                 </div>
@@ -90,25 +90,35 @@
         <footer class="divFooter fixed">
             <!-- <img src="icon-250.png" style="opacity: 0.1" /> -->
         </footer>
+
+        <script>
+            const { createApp, ref } = Vue;
+
+            createApp({
+                setup() {
+                    const invoice = ref({});
+
+                    const currency = (value, symbol = "$", decimals = 2) => {
+                        if (value === undefined || value === null) return "";
+                        return (
+                            symbol +
+                            Number(value)
+                                .toFixed(decimals)
+                                .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
+                        );
+                    };
+
+                    window.electron.print((event, data) => {
+                        console.log(data);
+                        invoice.value = data;
+                    });
+
+                    return {
+                        invoice,
+                        currency,
+                    };
+                },
+            }).mount("#app");
+        </script>
     </body>
-
-    <script>
-        const app = angular.module("printApp", []);
-        app.controller("printController", function ($scope) {
-            window.electron.print((event, data) => {
-                console.log(data);
-                $scope.$digest(($scope.invoice = data));
-                // $scope.$digest(($scope.invoice = data.invoice));
-            });
-
-            $scope.splitArrayIntoChunks = function (array, chunkSize) {
-                $scope.chunks = [];
-                for (let i = 0; i < array.length; i += chunkSize) {
-                    $scope.chunks.push(array.slice(i, i + chunkSize));
-                }
-
-                return $scope.chunks;
-            };
-        });
-    </script>
 </html>

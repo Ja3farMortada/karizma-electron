@@ -1,0 +1,40 @@
+name: Build Karizma Windows EXE
+
+on:
+    push:
+        branches:
+            - main
+    workflow_dispatch:
+
+jobs:
+    windows:
+        name: Build Windows EXE
+        runs-on: windows-latest
+
+        steps:
+            # 1️⃣ Checkout repository
+            - name: Checkout Repository
+              uses: actions/checkout@v3
+
+            # 2️⃣ Setup Node.js
+            - name: Setup Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 20
+
+            # 3️⃣ Install main dependencies
+            - name: Install Electron App Dependencies
+              run: npm ci
+
+            # 6️⃣ Build Windows EXE
+            - name: Build & Publish EXE
+              run: npx electron-builder --x64 --win --publish always
+              env:
+                  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+            # 7️⃣ Upload EXE artifact
+            - name: Upload EXE Artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: karizma
+                  path: dist/*.exe
