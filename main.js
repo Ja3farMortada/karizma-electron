@@ -1,7 +1,15 @@
 const { app, BrowserWindow, ipcMain, Menu } = require("electron");
 const path = require("path");
+const log = require("electron-log"); // Added electron-log
 const template = require("./menu");
 const updater = require("./update");
+
+// Initialize Logger
+log.initialize();
+log.transports.file.level = "debug";
+console.log = log.log;
+console.error = log.error;
+log.info("App starting...");
 
 // -----------------------------------------------------------------------------
 // Constants & Configuration
@@ -42,21 +50,53 @@ const menu = Menu.buildFromTemplate(template);
 Menu.setApplicationMenu(menu);
 
 async function createMainWindow() {
+    log.info("Creating main window...");
     const win = new BrowserWindow(MAIN_WINDOW_CONFIG);
+
+    win.once("ready-to-show", () => {
+        log.info("Window ready to show event fired");
+    });
+
     win.maximize();
     win.show();
 
     const loadApp = () => {
-        if (isDev) {
-            win.loadURL("http://localhost:4200");
-        } else {
-            win.loadFile("app/browser/index.html");
+        try {
+            if (isDev) {
+                log.info("Loading development URL: http://localhost:4200");
+                win.loadURL("http://localhost:4200")
+                    .then(() => log.info("Dev URL loaded successfully"))
+                    .catch((e) => log.error("Failed to load dev URL", e));
+            } else {
+                const filePath = "app/browser/index.html";
+                log.info(`Loading production file: ${filePath}`);
+
+                // Logging the absolute path it resolves to, for debugging
+                const absolutePath = path.resolve(__dirname, filePath);
+                log.info(`Resolved absolute path: ${absolutePath}`);
+
+                win.loadFile(filePath)
+                    .then(() => log.info("File loaded successfully"))
+                    .catch((e) => log.error("Failed to load file", e));
+            }
+        } catch (error) {
+            log.error("Sync error in loadApp:", error);
         }
     };
 
     loadApp();
 
-    win.webContents.on("did-fail-load", loadApp);
+    win.webContents.on(
+        "did-fail-load",
+        (event, errorCode, errorDescription) => {
+            log.error(`did-fail-load: ${errorCode} - ${errorDescription}`);
+            loadApp();
+        }
+    );
+
+    win.webContents.on("crashed", (event) => {
+        log.error("Renderer process crashed");
+    });
 
     // Initialize Auto Updater
     updater(win, ipcMain);
