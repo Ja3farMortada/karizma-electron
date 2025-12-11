@@ -44,34 +44,19 @@ Menu.setApplicationMenu(menu);
 async function createMainWindow() {
     const win = new BrowserWindow(MAIN_WINDOW_CONFIG);
     win.maximize();
-    // Don't show immediately to avoid white screen
-    // win.show();
+    win.show();
 
     const loadApp = () => {
         if (isDev) {
             win.loadURL("http://localhost:4200");
         } else {
-            // Use absolute path for reliability in production
-            // const indexPath = path.join(__dirname, "app/browser/index.html");
             win.loadFile("app/browser/index.html");
         }
     };
 
     loadApp();
 
-    // Show window when ready to avoid white flash
-    win.once("ready-to-show", () => {
-        win.show();
-    });
-
-    // Logging instead of immediate infinite retry loop
-    win.webContents.on(
-        "did-fail-load",
-        (event, errorCode, errorDescription) => {
-            console.error(`Failed to load: ${errorCode} - ${errorDescription}`);
-            // Optional: Retry once after a delay or show an error page
-        }
-    );
+    win.webContents.on("did-fail-load", loadApp);
 
     // Initialize Auto Updater
     updater(win, ipcMain);
@@ -89,8 +74,7 @@ async function handlePrint(templatePath, data) {
     const printWindow = new BrowserWindow(PRINT_WINDOW_CONFIG);
 
     try {
-        const fullPath = path.join(__dirname, templatePath);
-        await printWindow.loadFile(fullPath);
+        await printWindow.loadFile(templatePath);
         printWindow.show();
 
         printWindow.webContents.on("did-finish-load", async () => {
