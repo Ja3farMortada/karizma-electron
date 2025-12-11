@@ -52,8 +52,8 @@ async function createMainWindow() {
             win.loadURL("http://localhost:4200");
         } else {
             // Use absolute path for reliability in production
-            const indexPath = path.join(__dirname, "app/browser/index.html");
-            win.loadFile(indexPath);
+            // const indexPath = path.join(__dirname, "app/browser/index.html");
+            win.loadFile("app/browser/index.html");
         }
     };
 
