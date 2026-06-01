@@ -1,1 +1,0 @@
-import{E as e}from"./chunk-Z6HXRVBJ.js";var c=(()=>{class t{constructor(){this.moneyAccounts=[{label:"Cash",value:"531"},{label:"Whish",value:"532"}]}static{this.\u0275fac=function(o){return new(o||t)}}static{this.\u0275prov=e({token:t,factory:t.\u0275fac,providedIn:"root"})}}return t})();export{c as a};

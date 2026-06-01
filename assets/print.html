@@ -1,124 +1,280 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Print</title>
-        <link
-            rel="stylesheet"
-            href="../node_modules/bootstrap/dist/css/bootstrap.min.css"
-        />
-        <link rel="stylesheet" href="printStyle.css" />
+        <title>Invoice</title>
         <script src="../node_modules/vue/dist/vue.global.js"></script>
+        <style>
+            :root {
+                --navy: #0f172a;
+                --blue: #3b82f6;
+                --slate: #64748b;
+                --text: #1e293b;
+                --line: #e2e8f0;
+                --panel: #f8fafc;
+                --muted: #94a3b8;
+                --red: #dc2626;
+                --green: #16a34a;
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: Helvetica, Arial, sans-serif;
+                color: var(--text);
+                /* keep background colors when printing */
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            /* ── Header banner ─────────────────────────────── */
+            .banner {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                background: var(--navy);
+                color: #fff;
+                padding: 18px 24px;
+            }
+            .banner .brand {
+                font-size: 22px;
+                font-weight: 700;
+                letter-spacing: 1px;
+            }
+            .banner .doc {
+                font-size: 28px;
+                font-weight: 700;
+            }
+            .accent {
+                height: 3px;
+                background: var(--blue);
+            }
+
+            .body {
+                padding: 24px;
+            }
+
+            /* ── Recipient + invoice meta ──────────────────── */
+            .top {
+                display: flex;
+                justify-content: space-between;
+                gap: 24px;
+                margin-bottom: 22px;
+            }
+            .bill-to {
+                width: 55%;
+                background: var(--panel);
+                border: 1px solid var(--line);
+                border-radius: 6px;
+                padding: 12px 16px;
+            }
+            .bill-to .label {
+                margin: 0 0 6px;
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 1px;
+                color: var(--blue);
+            }
+            .bill-to .name {
+                margin: 0 0 4px;
+                font-size: 14px;
+                font-weight: 700;
+                color: var(--navy);
+            }
+            .bill-to .line {
+                margin: 2px 0;
+                font-size: 11px;
+                color: var(--slate);
+            }
+            .meta {
+                min-width: 180px;
+                text-align: right;
+            }
+            .meta .pair {
+                margin-bottom: 6px;
+            }
+            .meta .k {
+                font-size: 10px;
+                color: var(--slate);
+            }
+            .meta .v {
+                font-size: 12px;
+                font-weight: 700;
+                color: var(--navy);
+            }
+
+            /* ── Items table ───────────────────────────────── */
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 12px;
+            }
+            thead th {
+                background: var(--navy);
+                color: #fff;
+                font-weight: 700;
+                padding: 8px 10px;
+                text-align: center;
+            }
+            tbody td {
+                padding: 7px 10px;
+                border-bottom: 1px solid var(--line);
+            }
+            tbody tr:nth-child(even) {
+                background: var(--panel);
+            }
+            .t-center {
+                text-align: center;
+            }
+            .t-left {
+                text-align: left;
+            }
+            .t-right {
+                text-align: right;
+            }
+
+            /* ── Totals ────────────────────────────────────── */
+            .totals-wrap {
+                display: flex;
+                justify-content: flex-end;
+                margin-top: 18px;
+            }
+            .totals {
+                width: 260px;
+                background: var(--panel);
+                border: 1px solid var(--line);
+                border-radius: 6px;
+                padding: 14px 16px;
+            }
+            .totals .row {
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+                font-size: 12px;
+            }
+            .totals .row .k {
+                color: var(--slate);
+            }
+            .totals .row .v {
+                font-weight: 700;
+                color: var(--navy);
+            }
+            .totals .divider {
+                height: 1px;
+                background: var(--line);
+                margin: 8px 0;
+            }
+            .totals .due {
+                color: var(--red);
+            }
+            .totals .clear {
+                color: var(--green);
+            }
+            .totals .asof {
+                margin-top: 6px;
+                font-size: 9px;
+                font-style: italic;
+                color: var(--muted);
+            }
+
+            @page {
+                size: A4;
+                margin: 12mm;
+            }
+        </style>
     </head>
-    <body id="app">
-        <div class="header primary">
-            <div class="row d-flex justify-content-between wrapper">
-                <div class="col-7">
-                    <img src="logo.png" height="80px" />
-                </div>
-                <div class="col-5 text-end">
-                    <p></p>
-                    <p>+961 00 000 000<strong> :الهاتف</strong></p>
-                </div>
+    <body>
+        <div id="app">
+            <!-- ── Header banner ── -->
+            <div class="banner">
+                <div class="brand">KARIZMA</div>
+                <div class="doc">{{ docTitle }}</div>
             </div>
+            <div class="accent"></div>
 
-            <hr class="mt-0 pt-0 primary-hr wrapper" />
+            <div class="body">
+                <!-- ── Recipient + invoice info ── -->
+                <div class="top">
+                    <div class="bill-to">
+                        <p class="label">{{ recipientLabel }}</p>
+                        <p class="name">{{ recipientName }}</p>
+                        <!-- Phone / address apply to a billed customer only. -->
+                        <p class="line" v-if="!isDelivery && invoice.customer_phone">
+                            Phone: {{ invoice.customer_phone }}
+                        </p>
+                        <p class="line" v-if="!isDelivery && invoice.customer_address">
+                            {{ invoice.customer_address }}
+                        </p>
+                    </div>
 
-            <div class="row d-flex justify-content-between">
-                <div class="col-6">
-                    <p>
-                        <strong>Billed To:</strong> {{ invoice.customer_name }}
-                        <br />
-                        <strong>Phone:</strong> {{ invoice.customer_phone }}
-                        <br />
-                        <strong>Address:</strong> {{ invoice.customer_address }}
-                    </p>
+                    <div class="meta">
+                        <div class="pair">
+                            <div class="k">Invoice Number</div>
+                            <div class="v">#{{ invoice.invoice_number }}</div>
+                        </div>
+                        <div class="pair">
+                            <div class="k">Date</div>
+                            <div class="v">{{ dateValue }}</div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="col-2">
-                    <!-- <h2 class="text-center">Price Quote</h2> -->
-                </div>
+                <!-- ── Items table ── -->
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 8%">#</th>
+                            <th class="t-left">Description</th>
+                            <th style="width: 12%">Qty</th>
+                            <th style="width: 18%">Unit Price</th>
+                            <th style="width: 18%">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item, index) in invoice.items" :key="index">
+                            <td class="t-center">{{ index + 1 }}</td>
+                            <td class="t-left">{{ item.product_name }}</td>
+                            <td class="t-center">{{ item.quantity }}</td>
+                            <td class="t-right">{{ currency(item.unit_price) }}</td>
+                            <td class="t-right">{{ currency(lineTotal(item)) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
 
-                <div class="col-4 text-end">
-                    <h3 v-if="invoice.type == 'sale'">Sales Invoice</h3>
-                    <h3 v-if="invoice.type == 'return'">Return Invoice</h3>
-                    <p>
-                        <strong>Invoice #:</strong> {{ invoice.invoice_number }}
-                        <br />
-                        <strong>Date:</strong> {{ invoice.order_datetime }}
-                    </p>
-                </div>
+                <!-- ── Totals ── -->
+                <div class="totals-wrap">
+                    <div class="totals">
+                        <div class="row">
+                            <span class="k">Total Amount</span>
+                            <span class="v">{{ currency(grandTotal) }}</span>
+                        </div>
 
-                <br />
-            </div>
-
-            <table class="table table-bordered table-sm text-center">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Item Description</th>
-                        <th>Unit Price</th>
-                        <th>Qty</th>
-                        <th>Total Price</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(record, index) in invoice.items" :key="index">
-                        <td>{{ index + 1 }}</td>
-                        <td>{{ record.product_name }}</td>
-                        <td>{{ currency(record.unit_price) }}</td>
-
-                        <td>{{ record.quantity }}</td>
-
-                        <td>{{ currency(record.total_price) }}</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div class="row d-flex justify-content-end text-end">
-                <div class="col-6 text-end">
-                    <strong
-                        >Grand total: {{ currency(invoice.total_amount)
-                        }}</strong
-                    >
+                        <!-- Remaining balance: sales only, and only when the
+                             payload carries it (Angular does not send it yet). -->
+                        <template v-if="!isDelivery && invoice.balance != null">
+                            <div class="divider"></div>
+                            <div class="row">
+                                <span class="k">Remaining Balance</span>
+                                <span
+                                    class="v"
+                                    :class="Number(invoice.balance) > 0 ? 'due' : 'clear'"
+                                >
+                                    {{ currency(invoice.balance) }}
+                                </span>
+                            </div>
+                            <div class="asof">as of {{ today }}</div>
+                        </template>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <footer class="divFooter fixed">
-            <!-- <img src="icon-250.png" style="opacity: 0.1" /> -->
-        </footer>
-
-        <script>
-            const { createApp, ref } = Vue;
-
-            createApp({
-                setup() {
-                    const invoice = ref({});
-
-                    const currency = (value, symbol = "$", decimals = 2) => {
-                        if (value === undefined || value === null) return "";
-                        return (
-                            symbol +
-                            Number(value)
-                                .toFixed(decimals)
-                                .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
-                        );
-                    };
-
-                    window.electron.print((event, data) => {
-                        console.log(data);
-                        invoice.value = data;
-                    });
-
-                    return {
-                        invoice,
-                        currency,
-                    };
-                },
-            }).mount("#app");
-        </script>
+        <script src="print.js"></script>
     </body>
 </html>
