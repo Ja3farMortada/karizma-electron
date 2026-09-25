@@ -9,6 +9,24 @@
             href="../node_modules/bootstrap/dist/css/bootstrap.min.css"
         />
         <link rel="stylesheet" href="printStyle.css" />
+        <style>
+            /* printStyle.css has `tr:last-child > td:last-child { border-bottom:
+               2px solid black !important }` — a grand-total underline, apparently
+               left over from an older invoice layout (print.html no longer loads
+               this file). A stock table has no total, so the rule only drew a stray
+               line under the last Price cell of every category. Restore the normal
+               cell border here, scoped to stock tables. */
+            .stock-table tr:last-child > td:last-child {
+                border-bottom: var(--bs-border-width) solid var(--bs-border-color) !important;
+            }
+
+            /* Keep a category heading on the same page as its table, instead of
+               stranding it at the foot of a page with the rows overleaf. */
+            .category-heading {
+                break-after: avoid;
+                page-break-after: avoid;
+            }
+        </style>
         <script src="../node_modules/vue/dist/vue.global.js"></script>
     </head>
     <body id="app">
@@ -36,11 +54,11 @@
                 </tbody>
             </table> -->
             <div v-for="(cat, index) in categories" :key="index">
-                <h4 class="mt-4 mb-2 text-dark text-uppercase">
+                <h4 class="mt-4 mb-2 text-dark text-uppercase category-heading">
                     {{ cat.category_name }}
                 </h4>
 
-                <table class="table table-sm table-bordered text-center">
+                <table class="table table-sm table-bordered text-center stock-table">
                     <thead class="table-light">
                         <tr>
                             <th>#</th>
