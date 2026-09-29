@@ -1,0 +1,1 @@
+import{H as t,M as n,Ob as o,rc as i}from"./chunk-CY3DSYCA.js";var C=(()=>{class e{static \u0275fac=function(s){return new(s||e)};static \u0275mod=n({type:e});static \u0275inj=t({imports:[o,i]})}return e})();export{C as a};
