@@ -6,12 +6,21 @@ createApp({
         // before the invoice arrives from the main process.
         const invoice = ref({ items: [] });
 
-        // Matches the "as of <date>" line in the Angular PDF.
-        const today = new Date().toLocaleDateString("en-GB", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-        });
+        // "as of" stamp under the balance, same format as the Angular PDF:
+        // "30 September 2026, 14:05". Date and time are formatted apart because a
+        // combined toLocaleString reads "… at 14:05" on newer ICU.
+        const formatStamp = (date) =>
+            date.toLocaleDateString("en-GB", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+            }) +
+            ", " +
+            date.toLocaleTimeString("en-GB", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hourCycle: "h23",
+            });
 
         // Same currency formatter used by the other print templates.
         const currency = (value, symbol = "$", decimals = 2) => {
@@ -24,10 +33,12 @@ createApp({
             );
         };
 
-        // ── Sales vs delivery (mirrors PdfService.exportInvoicePDF) ──
+        // ── Sales vs return vs delivery (mirrors PdfService.exportInvoicePDF) ──
         const isDelivery = computed(() => invoice.value.type === "delivery");
+        // A return prints like a sale (same balance block) under its own title.
+        const isReturn = computed(() => invoice.value.type === "return");
         const docTitle = computed(() =>
-            isDelivery.value ? "DELIVERY" : "INVOICE"
+            isDelivery.value ? "DELIVERY" : isReturn.value ? "RETURN" : "INVOICE"
         );
         const recipientLabel = computed(() =>
             isDelivery.value ? "DELIVER TO" : "BILL TO"
@@ -53,6 +64,36 @@ createApp({
         const lineTotal = (item) =>
             item.total_price ?? item.quantity * (item.unit_price || 0);
 
+        // Payment rows between the total and the balance, like the PDF: a sale's
+        // Cash / Whish amounts, a return's money handed back. The client sends a
+        // `payments` list; an older payload carries a single `payment` (+ optional
+        // paymentLabel) instead. Zero amounts are left out.
+        const paymentRows = computed(() => {
+            if (isDelivery.value) return [];
+            const { payments, payment, paymentLabel } = invoice.value;
+            const rows = Array.isArray(payments)
+                ? payments
+                : [
+                      {
+                          label:
+                              paymentLabel ||
+                              (isReturn.value ? "Returned Payment" : "Payment"),
+                          amount: payment,
+                      },
+                  ];
+            return rows.filter(
+                (row) => row && row.amount != null && Number(row.amount) !== 0
+            );
+        });
+        // The balance changes over time, so it is stamped with when the client
+        // read it (balance_as_of); a payload without one falls back to now.
+        const asOf = computed(() => {
+            const read = new Date(invoice.value.balance_as_of);
+            return formatStamp(
+                invoice.value.balance_as_of && !isNaN(read) ? read : new Date()
+            );
+        });
+
         // Close the (hidden) window once the OS print dialog is dismissed,
         // whether the user printed or cancelled.
         window.addEventListener("afterprint", () => window.close());
@@ -72,7 +113,7 @@ createApp({
 
         return {
             invoice,
-            today,
+            asOf,
             currency,
             isDelivery,
             docTitle,
@@ -81,6 +122,7 @@ createApp({
             dateValue,
             grandTotal,
             lineTotal,
+            paymentRows,
         };
     },
 }).mount("#app");

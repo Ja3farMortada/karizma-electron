@@ -151,6 +151,9 @@
                 border: 1px solid var(--line);
                 border-radius: 6px;
                 padding: 14px 16px;
+                /* keep it whole: a page break must not strand the balance / "as of" */
+                break-inside: avoid;
+                page-break-inside: avoid;
             }
             .totals .row {
                 display: flex;
@@ -165,15 +168,19 @@
                 font-weight: 700;
                 color: var(--navy);
             }
+            .totals .row + .row {
+                margin-top: 6px;
+            }
             .totals .divider {
                 height: 1px;
                 background: var(--line);
                 margin: 8px 0;
             }
-            .totals .due {
+            /* .row scope: must outrank ".totals .row .v" or the navy wins */
+            .totals .row .due {
                 color: var(--red);
             }
-            .totals .clear {
+            .totals .row .clear {
                 color: var(--green);
             }
             .totals .asof {
@@ -255,8 +262,19 @@
                             <span class="v">{{ currency(grandTotal) }}</span>
                         </div>
 
-                        <!-- Remaining balance: sales only, and only when the
-                             payload carries it (Angular does not send it yet). -->
+                        <!-- Payments: a sale's Cash / Whish, a return's money
+                             handed back (none from history prints). -->
+                        <div
+                            class="row"
+                            v-for="(row, index) in paymentRows"
+                            :key="index"
+                        >
+                            <span class="k">{{ row.label }}</span>
+                            <span class="v">{{ currency(row.amount) }}</span>
+                        </div>
+
+                        <!-- Remaining balance: sales / returns, when the payload
+                             carries it (none on a cash sale — no customer). -->
                         <template v-if="!isDelivery && invoice.balance != null">
                             <div class="divider"></div>
                             <div class="row">
@@ -268,7 +286,7 @@
                                     {{ currency(invoice.balance) }}
                                 </span>
                             </div>
-                            <div class="asof">as of {{ today }}</div>
+                            <div class="asof">as of {{ asOf }}</div>
                         </template>
                     </div>
                 </div>
