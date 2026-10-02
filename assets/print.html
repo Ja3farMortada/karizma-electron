@@ -257,6 +257,11 @@
                 <!-- ── Totals ── -->
                 <div class="totals-wrap">
                     <div class="totals">
+                        <!-- Pieces on the invoice — first, above the money. -->
+                        <div class="row">
+                            <span class="k">Total Qty</span>
+                            <span class="v">{{ totalQty }}</span>
+                        </div>
                         <div class="row">
                             <span class="k">Total Amount</span>
                             <span class="v">{{ currency(grandTotal) }}</span>

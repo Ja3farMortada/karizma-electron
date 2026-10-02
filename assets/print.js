@@ -63,6 +63,17 @@ createApp({
         // Delivery items have no per-line total → derive it.
         const lineTotal = (item) =>
             item.total_price ?? item.quantity * (item.unit_price || 0);
+        // Pieces on the invoice, the first totals row (as in the PDF). Quantities
+        // may arrive as DECIMAL strings, so coerce and skip anything non-numeric
+        // (no NaN). "1,234" when whole, else up to 2dp — same rule as PdfService.
+        const totalQty = computed(() =>
+            (invoice.value.items || [])
+                .reduce((sum, item) => {
+                    const qty = Number(item.quantity);
+                    return Number.isFinite(qty) ? sum + qty : sum;
+                }, 0)
+                .toLocaleString("en-US", { maximumFractionDigits: 2 })
+        );
 
         // Payment rows between the total and the balance, like the PDF: a sale's
         // Cash / Whish amounts, a return's money handed back. The client sends a
@@ -122,6 +133,7 @@ createApp({
             dateValue,
             grandTotal,
             lineTotal,
+            totalQty,
             paymentRows,
         };
     },
