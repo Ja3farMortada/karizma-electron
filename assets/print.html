@@ -139,60 +139,100 @@
                 text-align: right;
             }
 
-            /* ── Totals ────────────────────────────────────── */
-            .totals-wrap {
-                display: flex;
-                justify-content: flex-end;
-                margin-top: 18px;
+            /* Continued pages: the column header row repeats (a thead does
+               this in print) and a row never splits across two pages. */
+            thead {
+                display: table-header-group;
             }
-            .totals {
-                width: 260px;
-                background: var(--panel);
-                border: 1px solid var(--line);
-                border-radius: 6px;
-                padding: 14px 16px;
-                /* keep it whole: a page break must not strand the balance / "as of" */
+            tbody tr {
                 break-inside: avoid;
                 page-break-inside: avoid;
             }
-            .totals .row {
+
+            /* ── Summary tiles ─────────────────────────────── */
+            /* Above the items table, so the money always prints on page 1 —
+               never alone on an extra page after a table that filled the sheet. */
+            .summary {
                 display: flex;
-                justify-content: space-between;
-                align-items: baseline;
-                font-size: 12px;
+                gap: 8px;
+                margin-bottom: 18px;
+                break-inside: avoid;
+                page-break-inside: avoid;
             }
-            .totals .row .k {
+            /* Equal widths, but never narrower than the amount it holds (min-width
+               stays auto): a 7-figure total widens its tile rather than overflow. */
+            .tile {
+                flex: 1 1 0;
+                background: var(--panel);
+                border: 1px solid var(--line);
+                border-radius: 6px;
+                padding: 9px 10px 10px;
+            }
+            .tile .k {
+                font-size: 8.5px;
+                font-weight: 700;
+                letter-spacing: 0.4px;
+                text-transform: uppercase;
                 color: var(--slate);
             }
-            .totals .row .v {
+            .tile .v {
+                margin-top: 4px;
+                font-size: 14px;
                 font-weight: 700;
                 color: var(--navy);
+                white-space: nowrap;
             }
-            .totals .row + .row {
-                margin-top: 6px;
+            /* Total Amount: the figure the customer looks for first. */
+            .tile.total {
+                border-color: var(--blue);
+                box-shadow: inset 0 3px 0 var(--blue);
             }
-            .totals .divider {
-                height: 1px;
-                background: var(--line);
-                margin: 8px 0;
+            .tile.total .v {
+                font-size: 17px;
             }
-            /* .row scope: must outrank ".totals .row .v" or the navy wins */
-            .totals .row .due {
+            /* Remaining balance, coloured by sign: owed (red) / clear (green). */
+            .tile.due {
+                background: #fef2f2;
+                border-color: #fecaca;
+            }
+            .tile.due .v {
                 color: var(--red);
             }
-            .totals .row .clear {
+            .tile.clear {
+                background: #f0fdf4;
+                border-color: #bbf7d0;
+            }
+            .tile.clear .v {
                 color: var(--green);
             }
-            .totals .asof {
-                margin-top: 6px;
-                font-size: 9px;
+            .tile .asof {
+                margin-top: 3px;
+                font-size: 8px;
                 font-style: italic;
                 color: var(--muted);
             }
 
+            /* Bottom margin is a little deeper than the rest to hold the footer;
+               Electron's print keeps CSS @page margins. */
             @page {
                 size: A4;
-                margin: 12mm;
+                margin: 12mm 12mm 16mm;
+
+                /* Footer on every page: page margin boxes, Chromium 131+
+                   (Electron 39 is Chromium 142). */
+                @bottom-left {
+                    /* content: "Invoice #…", set by print.js once the data
+                       arrives — a margin box can't bind to the DOM. */
+                    font-family: Helvetica, Arial, sans-serif;
+                    font-size: 9px;
+                    color: #64748b;
+                }
+                @bottom-right {
+                    content: "Page " counter(page) " of " counter(pages);
+                    font-family: Helvetica, Arial, sans-serif;
+                    font-size: 9px;
+                    color: #64748b;
+                }
             }
         </style>
     </head>
@@ -200,7 +240,7 @@
         <div id="app">
             <!-- ── Header banner ── -->
             <div class="banner">
-                <div class="brand">KARIZMA</div>
+                <div class="brand">{{ brand }}</div>
                 <div class="doc">{{ docTitle }}</div>
             </div>
             <div class="accent"></div>
@@ -232,6 +272,38 @@
                     </div>
                 </div>
 
+                <!-- ── Summary ── -->
+                <div class="summary">
+                    <!-- Pieces on the invoice — first, before the money. -->
+                    <div class="tile">
+                        <div class="k">Total Qty</div>
+                        <div class="v">{{ totalQty }}</div>
+                    </div>
+                    <div class="tile total">
+                        <div class="k">Total Amount</div>
+                        <div class="v">{{ currency(grandTotal) }}</div>
+                    </div>
+
+                    <!-- Payments: a sale's Cash / Whish, a return's money handed
+                         back (none from history prints). -->
+                    <div class="tile" v-for="(row, index) in paymentRows" :key="index">
+                        <div class="k">{{ row.label }}</div>
+                        <div class="v">{{ currency(row.amount) }}</div>
+                    </div>
+
+                    <!-- Remaining balance: sales / returns, when the payload carries
+                         it (none on a cash sale — no customer). -->
+                    <div
+                        class="tile"
+                        :class="Number(invoice.balance) > 0 ? 'due' : 'clear'"
+                        v-if="!isDelivery && invoice.balance != null"
+                    >
+                        <div class="k">Remaining Balance</div>
+                        <div class="v">{{ currency(invoice.balance) }}</div>
+                        <div class="asof">as of {{ asOf }}</div>
+                    </div>
+                </div>
+
                 <!-- ── Items table ── -->
                 <table>
                     <thead>
@@ -253,48 +325,6 @@
                         </tr>
                     </tbody>
                 </table>
-
-                <!-- ── Totals ── -->
-                <div class="totals-wrap">
-                    <div class="totals">
-                        <!-- Pieces on the invoice — first, above the money. -->
-                        <div class="row">
-                            <span class="k">Total Qty</span>
-                            <span class="v">{{ totalQty }}</span>
-                        </div>
-                        <div class="row">
-                            <span class="k">Total Amount</span>
-                            <span class="v">{{ currency(grandTotal) }}</span>
-                        </div>
-
-                        <!-- Payments: a sale's Cash / Whish, a return's money
-                             handed back (none from history prints). -->
-                        <div
-                            class="row"
-                            v-for="(row, index) in paymentRows"
-                            :key="index"
-                        >
-                            <span class="k">{{ row.label }}</span>
-                            <span class="v">{{ currency(row.amount) }}</span>
-                        </div>
-
-                        <!-- Remaining balance: sales / returns, when the payload
-                             carries it (none on a cash sale — no customer). -->
-                        <template v-if="!isDelivery && invoice.balance != null">
-                            <div class="divider"></div>
-                            <div class="row">
-                                <span class="k">Remaining Balance</span>
-                                <span
-                                    class="v"
-                                    :class="Number(invoice.balance) > 0 ? 'due' : 'clear'"
-                                >
-                                    {{ currency(invoice.balance) }}
-                                </span>
-                            </div>
-                            <div class="asof">as of {{ asOf }}</div>
-                        </template>
-                    </div>
-                </div>
             </div>
         </div>
 

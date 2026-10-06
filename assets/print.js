@@ -1,4 +1,4 @@
-const { createApp, ref, computed, nextTick } = Vue;
+const { createApp, ref, computed, watchEffect, nextTick } = Vue;
 
 createApp({
     setup() {
@@ -33,6 +33,10 @@ createApp({
             );
         };
 
+        // Banner name, from the client's environment (`brand`); payloads from an
+        // older client bundle don't carry it.
+        const brand = computed(() => invoice.value.brand || "KARIZMA");
+
         // ── Sales vs return vs delivery (mirrors PdfService.exportInvoicePDF) ──
         const isDelivery = computed(() => invoice.value.type === "delivery");
         // A return prints like a sale (same balance block) under its own title.
@@ -63,7 +67,7 @@ createApp({
         // Delivery items have no per-line total → derive it.
         const lineTotal = (item) =>
             item.total_price ?? item.quantity * (item.unit_price || 0);
-        // Pieces on the invoice, the first totals row (as in the PDF). Quantities
+        // Pieces on the invoice, the first summary tile (as in the PDF). Quantities
         // may arrive as DECIMAL strings, so coerce and skip anything non-numeric
         // (no NaN). "1,234" when whole, else up to 2dp — same rule as PdfService.
         const totalQty = computed(() =>
@@ -75,7 +79,7 @@ createApp({
                 .toLocaleString("en-US", { maximumFractionDigits: 2 })
         );
 
-        // Payment rows between the total and the balance, like the PDF: a sale's
+        // Payment tiles between the total and the balance, like the PDF: a sale's
         // Cash / Whish amounts, a return's money handed back. The client sends a
         // `payments` list; an older payload carries a single `payment` (+ optional
         // paymentLabel) instead. Zero amounts are left out.
@@ -105,6 +109,21 @@ createApp({
             );
         });
 
+        // Footer, left half: "Invoice #<number>" on every page, beside the
+        // "Page X of Y" in print.html. A page margin box shows only CSS
+        // `content`, so the number goes in as an @page rule of its own.
+        const cssString = (text) =>
+            '"' + String(text).replace(/["\\]/g, "\\$&").replace(/[\r\n\f]/g, " ") + '"';
+        const pageFooter = document.createElement("style");
+        document.head.appendChild(pageFooter);
+        watchEffect(() => {
+            const number = invoice.value.invoice_number;
+            pageFooter.textContent =
+                number == null || number === ""
+                    ? ""
+                    : `@page { @bottom-left { content: ${cssString("Invoice #" + number)}; } }`;
+        });
+
         // Close the (hidden) window once the OS print dialog is dismissed,
         // whether the user printed or cancelled.
         window.addEventListener("afterprint", () => window.close());
@@ -124,6 +143,7 @@ createApp({
 
         return {
             invoice,
+            brand,
             asOf,
             currency,
             isDelivery,
