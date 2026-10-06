@@ -108,6 +108,15 @@
                 font-weight: 700;
                 color: var(--navy);
             }
+            /* Prepared / Edited by: label and name on one line, so the block
+               stays about as tall as the recipient box beside it. A long name
+               wraps instead of widening the column into the recipient box. */
+            .meta .who {
+                max-width: 270px;
+                margin: 0 0 4px auto;
+                font-size: 12px;
+                overflow-wrap: anywhere;
+            }
 
             /* ── Items table ───────────────────────────────── */
             table {
@@ -268,6 +277,14 @@
                         <div class="pair">
                             <div class="k">Date</div>
                             <div class="v">{{ dateValue }}</div>
+                        </div>
+                        <!-- Who prepared / last edited it: only when the payload
+                             names them (older invoices and clients don't). -->
+                        <div class="who" v-if="preparedBy">
+                            <span class="k">Prepared By</span> <span class="v">{{ preparedBy }}</span>
+                        </div>
+                        <div class="who" v-if="editedBy">
+                            <span class="k">Edited By</span> <span class="v">{{ editedBy }}</span>
                         </div>
                     </div>
                 </div>

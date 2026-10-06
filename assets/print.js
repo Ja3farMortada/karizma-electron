@@ -54,6 +54,15 @@ createApp({
                       .join(" ") || "—"
                 : invoice.value.customer_name || "—"
         );
+        // Who prepared / last edited the order (names from the server). The
+        // editor shows only when it is someone else, as in the PDF; older
+        // invoices and client payloads carry neither and print as before.
+        const nameOf = (value) => (value == null ? "" : String(value).trim());
+        const preparedBy = computed(() => nameOf(invoice.value.prepared_by_name));
+        const editedBy = computed(() => {
+            const name = nameOf(invoice.value.edited_by_name);
+            return name !== preparedBy.value ? name : "";
+        });
         const dateValue = computed(() =>
             isDelivery.value
                 ? invoice.value.order_datetime
@@ -150,6 +159,8 @@ createApp({
             docTitle,
             recipientLabel,
             recipientName,
+            preparedBy,
+            editedBy,
             dateValue,
             grandTotal,
             lineTotal,
