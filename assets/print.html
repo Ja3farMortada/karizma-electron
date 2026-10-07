@@ -271,8 +271,8 @@
 
                     <div class="meta">
                         <div class="pair">
-                            <div class="k">Invoice Number</div>
-                            <div class="v">#{{ invoice.invoice_number }}</div>
+                            <div class="k">{{ docKind }} Number</div>
+                            <div class="v">#{{ docNumber }}</div>
                         </div>
                         <div class="pair">
                             <div class="k">Date</div>
@@ -299,21 +299,26 @@
                     <div class="tile total">
                         <div class="k">Total Amount</div>
                         <div class="v">{{ currency(grandTotal) }}</div>
+                        <!-- A quotation has no expiry: its prices are dated,
+                             like the balance's "as of" stamp. -->
+                        <div class="asof" v-if="isQuotation">
+                            Prices valid as of {{ validAsOf }}
+                        </div>
                     </div>
 
                     <!-- Payments: a sale's Cash / Whish, a return's money handed
-                         back (none from history prints). -->
+                         back (none from history prints; never on a quotation). -->
                     <div class="tile" v-for="(row, index) in paymentRows" :key="index">
                         <div class="k">{{ row.label }}</div>
                         <div class="v">{{ currency(row.amount) }}</div>
                     </div>
 
                     <!-- Remaining balance: sales / returns, when the payload carries
-                         it (none on a cash sale — no customer). -->
+                         it (none on a cash sale — no customer; never on a quotation). -->
                     <div
                         class="tile"
                         :class="Number(invoice.balance) > 0 ? 'due' : 'clear'"
-                        v-if="!isDelivery && invoice.balance != null"
+                        v-if="showBalance"
                     >
                         <div class="k">Remaining Balance</div>
                         <div class="v">{{ currency(invoice.balance) }}</div>
