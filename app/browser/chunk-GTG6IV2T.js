@@ -1,0 +1,1 @@
+import{b as e}from"./chunk-VCWQMPF7.js";function u(o,r){let t=e(o,r?.in),n=t.getMonth();return t.setFullYear(t.getFullYear(),n+1,0),t.setHours(23,59,59,999),t}function l(o,r){let t=e(o,r?.in);return t.setDate(1),t.setHours(0,0,0,0),t}function c(o,r){let t=e(o,r?.in),n=t.getFullYear();return t.setFullYear(n+1,0,0),t.setHours(23,59,59,999),t}export{u as a,l as b,c};
