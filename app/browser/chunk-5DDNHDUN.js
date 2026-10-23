@@ -1,1 +1,0 @@
-import{a as n}from"./chunk-AAGT6W22.js";import{U as e}from"./chunk-LYI6T52H.js";var f=(()=>{class t{transform(r){return r==null||r===""?"\u2014":n(r)}static{this.\u0275fac=function(i){return new(i||t)}}static{this.\u0275pipe=e({name:"rkMoney",type:t,pure:!0,standalone:!0})}}return t})();export{f as a};

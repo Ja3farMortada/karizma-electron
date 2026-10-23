@@ -1,0 +1,1 @@
+import{va as r}from"./chunk-N5ANDNW5.js";var e=class{constructor(s){this.first=r(0),this.key=null,this.rows=r(s)}set(s){let t=Number(s.rows),i=Number(s.first);Number.isInteger(t)&&t>0&&this.rows.set(t),this.first.set(Number.isInteger(i)&&i>=0?i:0)}offset(s){return this.key!==null&&s!==this.key&&this.first()!==0&&this.first.set(0),this.key=s,this.first()}};export{e as a};
