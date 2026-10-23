@@ -32,6 +32,26 @@ jobs:
             - name: Install Electron App Dependencies
               run: npm ci
 
+            # 4️⃣ Make sure the tag AND the release already exist
+            - name: Ensure GitHub Release Exists
+              shell: bash
+              env:
+                  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+              run: |
+                  VERSION=$(node -p "require('./package.json').version")
+                  TAG="v$VERSION"
+
+                  if gh release view "$TAG" > /dev/null 2>&1; then
+                      echo "Release $TAG already exists — electron-builder will upload into it."
+                  else
+                      # also creates the tag on this commit if it isn't there yet
+                      gh release create "$TAG" \
+                          --target "$GITHUB_SHA" \
+                          --title "$TAG" \
+                          --notes "Release $TAG"
+                      echo "Created release $TAG"
+                  fi
+
             # 6️⃣ Build Windows EXE
             - name: Build & Publish EXE
               run: npx electron-builder --x64 --win --publish always
