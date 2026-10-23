@@ -6,6 +6,11 @@ on:
             - main
     workflow_dispatch:
 
+# electron-builder publishes a GitHub Release. No-op while GH_TOKEN is a PAT,
+# but required if this is ever switched to the built-in GITHUB_TOKEN.
+permissions:
+    contents: write
+
 jobs:
     windows:
         name: Build Windows EXE
@@ -14,13 +19,14 @@ jobs:
         steps:
             # 1️⃣ Checkout repository
             - name: Checkout Repository
-              uses: actions/checkout@v3
+              uses: actions/checkout@v5
 
             # 2️⃣ Setup Node.js
             - name: Setup Node.js
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v5
               with:
-                  node-version: 20
+                  node-version: 24
+                  cache: npm
 
             # 3️⃣ Install main dependencies
             - name: Install Electron App Dependencies
