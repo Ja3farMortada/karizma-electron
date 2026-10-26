@@ -1,0 +1,1 @@
+var n={paged:!0},r=100;function s(t){if(Array.isArray(t))return{rows:t,notice:t.length>=r?`Showing the newest ${t.length}. Narrow the dates to see older ones.`:null};let e=Array.isArray(t?.rows)?t.rows:[],o=Number(t?.total);return{rows:e,notice:Number.isFinite(o)&&o>e.length?`Showing the newest ${e.length} of ${o}. Narrow the dates to see the others.`:null}}export{n as a,s as b};

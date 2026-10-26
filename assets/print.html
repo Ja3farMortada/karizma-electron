@@ -276,7 +276,7 @@
                         </div>
                         <div class="pair">
                             <div class="k">Date</div>
-                            <div class="v">{{ dateValue }}</div>
+                            <div class="v">{{ dateText }}</div>
                         </div>
                         <!-- Who prepared / last edited it: only when the payload
                              names them (older invoices and clients don't). -->
@@ -299,10 +299,10 @@
                     <div class="tile total">
                         <div class="k">Total Amount</div>
                         <div class="v">{{ currency(grandTotal) }}</div>
-                        <!-- A quotation has no expiry: its prices are dated,
-                             like the balance's "as of" stamp. -->
+                        <!-- A quotation has no expiry: its prices are dated (the
+                             last edit, Q13), like the balance's "as of" stamp. -->
                         <div class="asof" v-if="isQuotation">
-                            Prices valid as of {{ validAsOf }}
+                            Priced on {{ validAsOf }}
                         </div>
                     </div>
 

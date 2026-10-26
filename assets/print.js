@@ -117,9 +117,19 @@ createApp({
                     invoice.value.quotation_datetime
                   : invoice.value.order_date
         );
-        // A quotation's prices are a snapshot (no expiry), so it says from when:
-        // the quotation's own date — a reprint keeps it — or `valid_as_of` when
-        // the client sends one. Unreadable → the text as given; none → today.
+        // A quotation's prices are a snapshot (no expiry), so it says when they
+        // were set ("Priced on"): `valid_as_of`, the day of its last edit (the
+        // client sends it, date audit Q13), else the quotation's own date — a
+        // reprint keeps it. Unreadable → the text as given; none → today.
+        // The document's date as the PDF prints it (date audit D-27): "20 October
+        // 2026", or "20 October 2026, 16:23" when it has a time (a delivery).
+        // Unreadable → the text as given.
+        const dateText = computed(() => {
+            const raw = dateValue.value;
+            const date = toDate(raw);
+            if (!date) return raw == null ? "" : String(raw);
+            return /\d{2}:\d{2}/.test(String(raw)) ? formatStamp(date) : formatDay(date);
+        });
         const validAsOf = computed(() => {
             const raw = invoice.value.valid_as_of || dateValue.value;
             const date = toDate(raw);
@@ -175,13 +185,12 @@ createApp({
                 invoice.value.balance != null
         );
         // The balance changes over time, so it is stamped with when the client
-        // read it (balance_as_of); a payload without one falls back to now.
-        const asOf = computed(() => {
-            const read = new Date(invoice.value.balance_as_of);
-            return formatStamp(
-                invoice.value.balance_as_of && !isNaN(read) ? read : new Date()
-            );
-        });
+        // read it (balance_as_of); a payload without one falls back to now. The
+        // client sends it as Beirut wall clock ("2026-10-25 09:12:00", read by its
+        // parts on any device zone); older clients send an ISO instant.
+        const asOf = computed(() =>
+            formatStamp(toDate(invoice.value.balance_as_of) || new Date())
+        );
 
         // Footer, left half: "Invoice #<number>" ("Quotation #…") on every page,
         // beside the "Page X of Y" in print.html. A page margin box shows only
@@ -230,6 +239,7 @@ createApp({
             preparedBy,
             editedBy,
             dateValue,
+            dateText,
             validAsOf,
             grandTotal,
             lineTotal,
