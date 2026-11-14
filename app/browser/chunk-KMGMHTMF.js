@@ -1,1 +1,0 @@
-import{l as a,m as n}from"./chunk-RTWSJPY7.js";import{U as i}from"./chunk-N5ANDNW5.js";var p=(()=>{class t{transform(r,e="datetime"){return e==="day"?a(r):n(r,{seconds:e==="seconds"})}static{this.\u0275fac=function(e){return new(e||t)}}static{this.\u0275pipe=i({name:"wallDate",type:t,pure:!0,standalone:!0})}}return t})();export{p as a};

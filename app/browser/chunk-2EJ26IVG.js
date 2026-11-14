@@ -1,0 +1,1 @@
+import{N as t}from"./chunk-D3XDFSJM.js";var i=(()=>{class e{get isElectron(){return typeof window<"u"&&!!window.electron}get isWeb(){return!this.isElectron}get electron(){return typeof window<"u"&&window.electron||null}static{this.\u0275fac=function(n){return new(n||e)}}static{this.\u0275prov=t({token:e,factory:e.\u0275fac,providedIn:"root"})}}return e})();export{i as a};
